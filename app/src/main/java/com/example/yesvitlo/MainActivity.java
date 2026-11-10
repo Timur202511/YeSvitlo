@@ -56,6 +56,7 @@ tvDate = findViewById(R.id.tvDate);
                     Element timeElement = lastPost.selectFirst(".tgme_widget_message_date time");
 
 
+
                     if (textElement != null){
                         result = textElement.text();
                     } else {
