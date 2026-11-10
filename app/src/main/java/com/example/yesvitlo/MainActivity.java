@@ -15,9 +15,13 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 public class MainActivity extends AppCompatActivity {
     Button btnCheck;
-    TextView tvResult;
+    TextView tvResult, tvDate;
 
     String channelURL = "https://t.me/s/cek_info";
 
@@ -34,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
 
         btnCheck = findViewById(R.id.btnCheck);
         tvResult = findViewById(R.id.tvResult);
-
+tvDate = findViewById(R.id.tvDate);
         btnCheck.setOnClickListener(v -> checkTelegram());
     }
 
@@ -45,19 +49,31 @@ public class MainActivity extends AppCompatActivity {
                 Document doc = Jsoup.connect(channelURL).userAgent("Mozilla/5.0").timeout(15000).get();
                 Elements posts = doc.select(".tgme_widget_message");
                 String result = "Постів не знайдено";
+                String dateTime = "Дата невідома";
                 if (!posts.isEmpty()){
                     Element lastPost = posts.last();
                     Element textElement = lastPost.selectFirst(".tgme_widget_message_text");
                     Element timeElement = lastPost.selectFirst(".tgme_widget_message_date time");
-                    String dateTime = "Дата невідома";
+
                     if (textElement != null){
                         result = textElement.text();
                     } else {
                         result = "Останій пост не мість тексту";
                     }
+                    if (timeElement != null){
+                        dateTime = timeElement.attr("dateTime");
+                        SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.US);
+                        Date date = inputFormat.parse(dateTime);
+                        SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy.MM.dd HH:mm", Locale.getDefault());
+                        dateTime = outputFormat.format(date);
+                    } else {
+                        result = "невдалось отримати дату поста" ;
+                    }
                 }
                 String finalResult = result;
+                String finalDate = dateTime;
                 runOnUiThread(()-> tvResult.setText(finalResult));
+                runOnUiThread(()-> tvDate.setText(finalDate));
             } catch (Exception e){
                 runOnUiThread(() -> tvResult.setText("Помилка завантаження телеграм"));
             }
